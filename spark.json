@@ -1,6 +1,6 @@
 {
     "name": "WebSocketServer",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "author": "math85360 https://github.com/math85360",
     "license": "MIT",
     "description": "Adapted WebSocket Server for the particle.io platform forked from brandenhall/Arduino-Websocket"
