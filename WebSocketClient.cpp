@@ -4,7 +4,7 @@
 #include "WebSocketClient.h"
 
 #include "sha1.h"
-#include "base64.h"
+#include "Base64.h"
 
 
 bool WebSocketClient::handshake(Client &client) {
@@ -63,7 +63,7 @@ bool WebSocketClient::analyzeRequest() {
 
 #ifdef DEBUGGING
     Serial.println(F("Sending websocket upgrade headers"));
-#endif    
+#endif
 
     socket_client->print(F("GET "));
     socket_client->print(path);
@@ -72,7 +72,7 @@ bool WebSocketClient::analyzeRequest() {
     socket_client->print(F("Connection: Upgrade\r\n"));
     socket_client->print(F("Host: "));
     socket_client->print(host);
-    socket_client->print(CRLF); 
+    socket_client->print(CRLF);
     socket_client->print(F("Sec-WebSocket-Key: "));
     socket_client->print(key);
     socket_client->print(CRLF);
@@ -84,7 +84,7 @@ bool WebSocketClient::analyzeRequest() {
 
 #ifdef DEBUGGING
     Serial.println(F("Analyzing response headers"));
-#endif    
+#endif
 
     while (socket_client->connected() && !socket_client->available()) {
         delay(100);
@@ -105,7 +105,7 @@ bool WebSocketClient::analyzeRequest() {
             } else if (temp.startsWith("Sec-WebSocket-Accept: ")) {
                 serverKey = temp.substring(22,temp.length() - 2); // Don't save last CR+LF
             }
-            temp = "";		
+            temp = "";
         }
 
         if (!socket_client->available()) {
@@ -146,7 +146,7 @@ bool WebSocketClient::handleStream(String& data, uint8_t *opcode) {
     if (!socket_client->connected() || !socket_client->available())
     {
         return false;
-    }      
+    }
 
     msgtype = timedRead();
     if (!socket_client->connected()) {
@@ -172,11 +172,11 @@ bool WebSocketClient::handleStream(String& data, uint8_t *opcode) {
         if (!socket_client->connected()) {
             return false;
         }
-            
+
         length |= timedRead();
         if (!socket_client->connected()) {
             return false;
-        }   
+        }
 
     } else if (length == WS_SIZE64) {
 #ifdef DEBUGGING
@@ -208,14 +208,14 @@ bool WebSocketClient::handleStream(String& data, uint8_t *opcode) {
             return false;
         }
     }
-        
+
     data = "";
-        
+
     if (opcode != NULL)
     {
       *opcode = msgtype & ~WS_FIN;
     }
-                
+
     if (hasMask) {
         for (i=0; i<length; ++i) {
             data += (char) (timedRead() ^ mask[i % 4]);
@@ -229,9 +229,9 @@ bool WebSocketClient::handleStream(String& data, uint8_t *opcode) {
             if (!socket_client->connected()) {
                 return false;
             }
-        }            
+        }
     }
-    
+
     return true;
 }
 
@@ -242,7 +242,7 @@ void WebSocketClient::disconnectStream() {
     // Should send 0x8700 to server to tell it I'm quitting here.
     socket_client->write((uint8_t) 0x87);
     socket_client->write((uint8_t) 0x00);
-    
+
     socket_client->flush();
     delay(10);
     socket_client->stop();
@@ -250,7 +250,7 @@ void WebSocketClient::disconnectStream() {
 
 bool WebSocketClient::getData(String& data, uint8_t *opcode) {
     return handleStream(data, opcode);
-}    
+}
 
 void WebSocketClient::sendData(const char *str, uint8_t opcode) {
 #ifdef DEBUGGING
@@ -258,7 +258,7 @@ void WebSocketClient::sendData(const char *str, uint8_t opcode) {
     Serial.println(str);
 #endif
     if (socket_client->connected()) {
-        sendEncodedData(str, opcode);       
+        sendEncodedData(str, opcode);
     }
 }
 
@@ -274,7 +274,7 @@ void WebSocketClient::sendData(String str, uint8_t opcode) {
 
 int WebSocketClient::timedRead() {
   while (!socket_client->available()) {
-    delay(20);  
+     delay(20);
   }
 
   return socket_client->read();
@@ -300,12 +300,12 @@ void WebSocketClient::sendEncodedData(char *str, uint8_t opcode) {
     mask[1] = random(0, 256);
     mask[2] = random(0, 256);
     mask[3] = random(0, 256);
-    
+
     socket_client->write(mask[0]);
     socket_client->write(mask[1]);
     socket_client->write(mask[2]);
     socket_client->write(mask[3]);
-     
+
     for (int i=0; i<size; ++i) {
         socket_client->write(str[i] ^ mask[i % 4]);
     }
